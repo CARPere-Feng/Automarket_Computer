@@ -2,7 +2,7 @@ set(MINILOAD_LIB_NAME miniload_core_motor)
 
 add_library(${MINILOAD_LIB_NAME} SHARED
         src/motor_control.cpp
-        )
+        include/miniloadCore/motor/iMotor.h)
 #ament_target_dependencies(${MINILOAD_LIB_NAME}
 #        miniload_core_communication)
 target_link_libraries(${MINILOAD_LIB_NAME}
