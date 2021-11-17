@@ -1,4 +1,7 @@
+project(examples)
+
 set(MINILOAD_LIB_NAME miniload_core_examples)
+
 
 add_executable(${MINILOAD_LIB_NAME}
         main.cpp

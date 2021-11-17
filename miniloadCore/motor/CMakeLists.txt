@@ -1,14 +1,21 @@
+project(motor)
+
 set(MINILOAD_LIB_NAME miniload_core_motor)
 
 add_library(${MINILOAD_LIB_NAME} SHARED
-        src/motor_control.cpp
-        include/miniloadCore/motor/iMotor.h)
-#ament_target_dependencies(${MINILOAD_LIB_NAME}
-#        miniload_core_communication)
+        src/motor_control.cpp)
+ament_target_dependencies(${MINILOAD_LIB_NAME}
+        rclcpp
+        )
+link_directories(${MINILOAD_LIB_NAME}
+        ${PROJECT_SOURCE_DIR}/include
+        )
 target_link_libraries(${MINILOAD_LIB_NAME}
         miniload_core_communication
-        CanCmd
+        ${rclcpp_LIBRIRAES}
         )
+
+ament_export_include_directories(include)
 
 install(
         TARGETS ${MINILOAD_LIB_NAME}

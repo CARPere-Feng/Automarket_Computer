@@ -1,4 +1,7 @@
+project(common)
+
 set(MINILOAD_LIB_NAME miniload_core_common)
+
 
 #add_library(${MOVEIT_LIB_NAME} SHARED
 #        src/planning_interface.cpp

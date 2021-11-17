@@ -19,20 +19,20 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-# include directories
-set(THIS_PACKAGE_INCLUDE_DIRS
-        common/include
-        communication/include
-        motor/include)
-
-set(THIS_PACKAGE_LIBRARIES
-        communication/lib
-)
-
-include_directories(
-        ${THIS_PACKAGE_INCLUDE_DIRS}
-        ${rclcpp_INCLUDE_DIRS}
-)
+## include directories
+#set(THIS_PACKAGE_INCLUDE_DIRS
+#        common/include
+#        communication/include
+#        motor/include)
+#
+#set(THIS_PACKAGE_LIBRARIES
+#        communication/lib
+#)
+#
+#include_directories(
+#        ${THIS_PACKAGE_INCLUDE_DIRS}
+#        ${rclcpp_INCLUDE_DIRS}
+#)
 
 add_subdirectory(common)
 add_subdirectory(communication)
@@ -56,13 +56,13 @@ add_subdirectory(examples)
 #)
 
 
-install(
-        DIRECTORY ${THIS_PACKAGE_LIBRARIES}
-        DESTINATION lib/${PROJECT_NAME}
-)
+#install(
+#        DIRECTORY ${THIS_PACKAGE_LIBRARIES}
+#        DESTINATION lib/${PROJECT_NAME}
+#)
+#
+#
 
-
-ament_export_include_directories(include)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
