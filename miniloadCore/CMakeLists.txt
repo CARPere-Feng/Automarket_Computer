@@ -19,49 +19,15 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-## include directories
-#set(THIS_PACKAGE_INCLUDE_DIRS
-#        common/include
-#        communication/include
-#        motor/include)
-#
-#set(THIS_PACKAGE_LIBRARIES
-#        communication/lib
-#)
-#
-#include_directories(
-#        ${THIS_PACKAGE_INCLUDE_DIRS}
-#        ${rclcpp_INCLUDE_DIRS}
-#)
-
 add_subdirectory(common)
 add_subdirectory(communication)
 add_subdirectory(motor)
 add_subdirectory(examples)
 
-#link_directories(
-#        lib
-#        ${rclcpp_LIB_DIRS}
-#)
-
 
 ######################
 ########INSTALL#######
 ######################
-
-#install(TARGETS
-#        can_drive_pkg
-#        main
-#        DESTINATION lib/${PROJECT_NAME}
-#)
-
-
-#install(
-#        DIRECTORY ${THIS_PACKAGE_LIBRARIES}
-#        DESTINATION lib/${PROJECT_NAME}
-#)
-#
-#
 
 
 if(BUILD_TESTING)

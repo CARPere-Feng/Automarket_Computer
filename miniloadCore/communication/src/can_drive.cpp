@@ -2,7 +2,7 @@
 #include "../include/miniloadCore/communication/ICANCmd.h"
 #include "../include/miniloadCore/communication/can_drive.h"
 
-#define dwType   ACUSB_131B //ACUSB_132B   设备类型
+#define dwType   USBCAN_C_1CH //ACUSB_131B   设备类型
 #define dwIndex   0  //设备端口号 从1开始
 #define dwChannel   0  //通道号
 
@@ -23,7 +23,7 @@ unsigned int can_communication::Can_Open()
     {
         std::cout << "open the device failure" << std::endl;
         return 0;
-    }   
+    }
     else 
     {
         std::cout << "open the device success" << std::endl;

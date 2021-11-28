@@ -2,21 +2,7 @@ project(common)
 
 set(MINILOAD_LIB_NAME miniload_core_common)
 
+add_library(${MINILOAD_LIB_NAME} SHARED
+        src/data_type.cpp include/miniloadCore/common/data_type.h)
 
-#add_library(${MOVEIT_LIB_NAME} SHARED
-#        src/planning_interface.cpp
-#        src/planning_response.cpp
-#        )
-#set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-#ament_target_dependencies(${MOVEIT_LIB_NAME}
-#        moveit_msgs
-#        urdf
-#        urdfdom
-#        urdfdom_headers
-#        )
-#target_link_libraries(${MOVEIT_LIB_NAME}
-#        moveit_robot_trajectory
-#        moveit_robot_state
-#        )
-#
-#install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include)

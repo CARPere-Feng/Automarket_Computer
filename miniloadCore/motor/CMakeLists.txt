@@ -3,7 +3,7 @@ project(motor)
 set(MINILOAD_LIB_NAME miniload_core_motor)
 
 add_library(${MINILOAD_LIB_NAME} SHARED
-        src/motor_control.cpp)
+        src/motor_control.cpp src/doubleMotor.cpp include/miniloadCore/motor/doubleMotor.h)
 ament_target_dependencies(${MINILOAD_LIB_NAME}
         rclcpp
         )
