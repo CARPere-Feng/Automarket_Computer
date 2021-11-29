@@ -10,6 +10,11 @@
 using INT16 = unsigned int;
 using BYTE = unsigned char;
 
+union hex2int32{
+    int integer32;
+    unsigned char hexVal[4];
+};
+
 union hex2int
 {
     int real_speed;

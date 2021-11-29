@@ -6,10 +6,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-union Control_value {
-  BYTE modify_value[4];
-  int exchange_value;
-};
 
 Motor_Control::Motor_Control(std::shared_ptr<can_communication>& CAN_obj):
     CAN_obj_(CAN_obj){
@@ -79,20 +75,33 @@ void Motor_Control::Motor_Mode_Control(INT16 Motor_RPDO_ID, BYTE WorkMode,
   }
 }
 
-void Motor_Control::Motor_Lift_Control(INT16 Motor_RPDO_ID, int Target_Position,
-                                       int Lift_Trapezoid_Speed) {
+void Motor_Control::Motor_Acc_Control(INT16 Motor_PRDO_ID, const hex2int32 &positive, const hex2int32 &negative) {
+    BYTE Send_Message[8];
+    for (int i = 0; i < 4; ++i) {
+        Send_Message[i] = positive.hexVal[i];
+        Send_Message[i+4] = negative.hexVal[i];
+    }
+    if (CAN_obj_->Can_Channel_Send(Motor_PRDO_ID, 8, Send_Message) == TRUE) {
+        // std::cout << "accelration control send sucess" << std::endl;
+    } else {
+        // std::cout << "acceleration control send failure" << std::endl;
+    }
+}
+
+void Motor_Control::Motor_Pos_Control(INT16 Motor_RPDO_ID, int Target_Position_inc,
+                                      int Trapezoid_Vel_rpm) {
   BYTE Send_Message[8];
-  union Control_value position, speed;
-  position.exchange_value = Target_Position;
-  speed.exchange_value = (512.0 * Lift_Trapezoid_Speed * encoder_num) / 1875.0;
-  Send_Message[0] = position.modify_value[0];
-  Send_Message[1] = position.modify_value[1];
-  Send_Message[2] = position.modify_value[2];
-  Send_Message[3] = position.modify_value[3];
-  Send_Message[4] = speed.modify_value[0];
-  Send_Message[5] = speed.modify_value[1];
-  Send_Message[6] = speed.modify_value[2];
-  Send_Message[7] = speed.modify_value[3];
+  hex2int32 position, speed;
+  position.integer32 = Target_Position_inc;
+  speed.integer32 = (512.0 * Trapezoid_Vel_rpm * encoder_num) / 1875.0;
+  Send_Message[0] = position.hexVal[0];
+  Send_Message[1] = position.hexVal[1];
+  Send_Message[2] = position.hexVal[2];
+  Send_Message[3] = position.hexVal[3];
+  Send_Message[4] = speed.hexVal[0];
+  Send_Message[5] = speed.hexVal[1];
+  Send_Message[6] = speed.hexVal[2];
+  Send_Message[7] = speed.hexVal[3];
   if (CAN_obj_->Can_Channel_Send(Motor_RPDO_ID, 8, Send_Message) == TRUE) {
     // std::cout << "lift control send sucess" << std::endl;
   } else {
@@ -100,117 +109,7 @@ void Motor_Control::Motor_Lift_Control(INT16 Motor_RPDO_ID, int Target_Position,
   }
 }
 
-bool Motor_Control::Motor_Feedback() {
-  BYTE data[2];
-  CAN_obj_->Can_Channel_Send(0x80, 0, data);
 
-  int count = 0;
-  bool flag_tmp[2];
-  flag_tmp[0] = false;
-  flag_tmp[1] = false;
-  if (CAN_obj_->Can_Channel_Receive()) {
-    left_dis = 0;
-    left_dis_value = 0;
-
-    right_dis = 0;
-    right_dis_value = 0;
-
-    for (int i = 0; i < 4; i++) {
-      if (CAN_obj_->Cdf_i[i].uID == 0x282)  // 0x282
-      {
-        if (flag_tmp[0]) {
-          count++;
-          continue;
-        }
-        speed_change.real_time_speed[0] = CAN_obj_->Cdf_i[i].arryData[0];
-        speed_change.real_time_speed[1] = CAN_obj_->Cdf_i[i].arryData[1];
-        speed_change.real_time_speed[2] = CAN_obj_->Cdf_i[i].arryData[2];
-        speed_change.real_time_speed[3] = CAN_obj_->Cdf_i[i].arryData[3];
-        dis_wheel.dis[0] = CAN_obj_->Cdf_i[i].arryData[4];
-        dis_wheel.dis[1] = CAN_obj_->Cdf_i[i].arryData[5];
-        dis_wheel.dis[2] = CAN_obj_->Cdf_i[i].arryData[6];
-        dis_wheel.dis[3] = CAN_obj_->Cdf_i[i].arryData[7];
-
-        // std::cout << std::hex << "0x" << CAN_obj_->Cdf_i[i].uID << "  : ";
-        // for (size_t j = 0; j < 8; j++) {
-        //   std::cout << std::hex << "0x" << (int)CAN_obj_->Cdf_i[i].arryData[j]
-        //             << "  ";
-        // }
-        // std::cout << std::endl;
-
-        left_dis_value = (double)dis_wheel.dis_moved / (double)encoder_num;
-        left_dis = -((double)dis_wheel.dis_moved * 2);
-        // ROS_WARN("left dis : %.6f", left_dis);
-        /*for(i=0;i<4;i++)
-        {
-                std::cout<<std::to_string(speed_change.real_time_speed[i])<<std::endl;
-        }*/
-        left_realtime_Speed =
-            -((speed_change.real_speed * 1875.0) / (encoder_num * 512.0 ));
-        if (left_realtime_Speed<5 & left_realtime_Speed> - 5) {
-          left_realtime_Speed = 0;
-        }
-        // std::cout<<"left_real_speed:"<<speed_change.real_speed<<std::endl;
-        // std::cout<<CAN_obj_->Cdf_i[i].uID<<std::endl;
-        // std::cout<<i<<std::endl;
-        flag_tmp[0] = true;
-        count++;
-      } else if (CAN_obj_->Cdf_i[i].uID == 0x281)  // 0x281
-      {
-        if (flag_tmp[1]) {
-          count++;
-          continue;
-        }
-        speed_change.real_time_speed[0] = CAN_obj_->Cdf_i[i].arryData[0];
-        speed_change.real_time_speed[1] = CAN_obj_->Cdf_i[i].arryData[1];
-        speed_change.real_time_speed[2] = CAN_obj_->Cdf_i[i].arryData[2];
-        speed_change.real_time_speed[3] = CAN_obj_->Cdf_i[i].arryData[3];
-        dis_wheel.dis[0] = CAN_obj_->Cdf_i[i].arryData[4];
-        dis_wheel.dis[1] = CAN_obj_->Cdf_i[i].arryData[5];
-        dis_wheel.dis[2] = CAN_obj_->Cdf_i[i].arryData[6];
-        dis_wheel.dis[3] = CAN_obj_->Cdf_i[i].arryData[7];
-
-        // std::cout << std::hex << "0x" << CAN_obj_->Cdf_i[i].uID << "  : ";
-        // for (size_t j = 0; j < 8; j++) {
-        //   std::cout << std::hex << "0x" << (int)CAN_obj_->Cdf_i[i].arryData[j]
-        //             << "  ";
-        // }
-        // std::cout << std::endl;
-
-        right_dis_value = (double)dis_wheel.dis_moved / (double)encoder_num;
-        right_dis = ((double)dis_wheel.dis_moved * 2 * PI);
-        // ROS_WARN("right dis : %.6f", right_dis);
-        /*for(i=0;i<4;i++)
-        {
-                std::cout<<std::to_string(speed_change.real_time_speed[i])<<std::endl;
-        }*/
-        right_realtime_Speed =
-            (speed_change.real_speed * 1875.0) / (encoder_num * 512.0 );
-        if (right_realtime_Speed<5 & right_realtime_Speed> - 5) {
-          right_realtime_Speed = 0;
-        }
-        // std::cout<<CAN_obj_->Cdf_i[i].uID<<std::endl;
-        //std::cout<<"right_real_speed:"<<std::to_string(right_realtime_Speed)<<std::endl;
-        // std::cout<<i<<std::endl;
-
-        flag_tmp[1] = true;
-        count++;
-      }
-    }
-  } else {
-    std::cout << CAN_obj_->Cdf_i[0].uID << std::endl;
-    std::cout << "I don't receive data" << std::endl;
-    return 0;
-  }
-
-  // ROS_INFO("data quantity for computation : %d", count);
-  if (flag_tmp[0] && flag_tmp[1]) {
-    return true;
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"),"One of the motor does not receive data ");
-    return false;
-  }
-}
 
 void Motor_Control::Dec2HexVector(BYTE *data_vec, const int &dec_value,
                                   const int &len) {
