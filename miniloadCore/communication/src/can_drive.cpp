@@ -141,7 +141,7 @@ void can_communication::Can_Channel_Receive(const unsigned long& size)
     assert(size < 2500);
     static int countrec = 0;
     while (true) {
-        //std::unique_lock locker(cdf_i_mutex_);
+        cdf_i_mutex_.lock();
         Cdf_i[0].bRemoteFlag = 0;
         Cdf_i[0].bExternFlag = 0;
 
@@ -149,8 +149,9 @@ void can_communication::Can_Channel_Receive(const unsigned long& size)
         while(Can_Rec_Count() < size) ;
 
         effective_rec_count_ = CAN_ChannelReceive(dwDeviceHandle, dwChannel, Cdf_i, size);
-        //locker.unlock();
-        std::cout << "===received counts in can driver:\t" << effective_rec_count_ << std::endl;
+
+        cdf_i_mutex_.unlock();
+        //std::cout << "===received counts in can driver:\t" << effective_rec_count_ << std::endl;
         if(effective_rec_count_ == 0)
         {
             std::cout << "the device is not exisit or usb lost,you can restart can device" << std::endl;

@@ -323,107 +323,107 @@ bool DoubleMotor::Motor_Feedback() {
     flag_tmp[1] = false;
     std::vector<int> a_dis_list, b_dis_list;
     std::vector<double> a_vel_list, b_vel_list;
-    std::shared_lock locker(CAN_connector_->cdf_i_mutex_);
+    CAN_connector_->cdf_i_mutex_.lock_shared();
     auto rec_count = CAN_connector_->effective_rec_count_;
-    //std::cout << "===received counts in feedback:\t" << rec_count << std::endl;
-    while (rec_count < 4){
-        rec_count = CAN_connector_->effective_rec_count_;
-        //std::cout << "===received counts in feedback:\t" << rec_count << std::endl;
-    }
-    a_dis_rot_ = 0;
-    b_dis_rot_ = 0;
-    for (int i = 0; i < rec_count; i++) {
-        if (CAN_connector_->Cdf_i[i].uID == 0x282)  // 0x282
-        {
-//                if (flag_tmp[0]) {
-//                    count++;
-//                    continue;
-//                }
-            vel_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[0];
-            vel_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[1];
-            vel_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[2];
-            vel_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[3];
-            dis_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[4];
-            dis_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[5];
-            dis_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[6];
-            dis_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[7];
-            a_vel_inc_ = vel_rec_buffer_.integer32;
-            a_dis_inc_ = dis_rec_buffer_.integer32;
-            a_dis_list.push_back(a_dis_inc_);
-
-            // std::cout << std::hex << "0x" << CAN_connector_->Cdf_i[i].uID << "  : ";
-            // for (size_t j = 0; j < 8; j++) {
-            //   std::cout << std::hex << "0x" << (int)CAN_connector_->Cdf_i[i].arryData[j]
-            //             << "  ";
-            // }
-            // std::cout << std::endl;
-
-            a_dis_rot_ = (double)a_dis_inc_ / (double)a_motor_->getEncoderResolution();
-            // ROS_WARN("left dis : %.6f", left_dis);
-            /*for(i=0;i<4;i++)
+    if (rec_count >= CAN_connector_->rec_window_) {
+        a_dis_rot_ = 0;
+        b_dis_rot_ = 0;
+        for (int i = 0; i < rec_count; i++) {
+            if (CAN_connector_->Cdf_i[i].uID == 0x282)  // 0x282
             {
-                    std::cout<<std::to_string(vel_rec_buffer_.hexVal[i])<<std::endl;
-            }*/
-            a_vel_rpm_ = ((a_vel_inc_ * 1875.0) / (a_motor_->getEncoderResolution() * 512.0 ));
-            a_vel_list.push_back(a_vel_rpm_);
+                if (flag_tmp[0]) {
+                    count++;
+                    continue;
+                }
+                vel_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[0];
+                vel_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[1];
+                vel_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[2];
+                vel_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[3];
+                dis_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[4];
+                dis_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[5];
+                dis_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[6];
+                dis_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[7];
+                a_vel_inc_ = vel_rec_buffer_.integer32;
+                a_dis_inc_ = dis_rec_buffer_.integer32;
+                a_dis_list.push_back(a_dis_inc_);
 
-            // std::cout<<CAN_connector_->Cdf_i[i].uID<<std::endl;
-            // std::cout<<i<<std::endl;
-            flag_tmp[0] = true;
-            count++;
-        } else if (CAN_connector_->Cdf_i[i].uID == 0x281)  // 0x281
-        {
-//                if (flag_tmp[1]) {
-//                    count++;
-//                    continue;
-//                }
-            vel_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[0];
-            vel_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[1];
-            vel_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[2];
-            vel_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[3];
-            dis_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[4];
-            dis_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[5];
-            dis_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[6];
-            dis_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[7];
-            b_vel_inc_ = vel_rec_buffer_.integer32;
-            b_dis_inc_ = dis_rec_buffer_.integer32;
-            b_dis_list.push_back(b_dis_inc_);
+                // std::cout << std::hex << "0x" << CAN_connector_->Cdf_i[i].uID << "  : ";
+                // for (size_t j = 0; j < 8; j++) {
+                //   std::cout << std::hex << "0x" << (int)CAN_connector_->Cdf_i[i].arryData[j]
+                //             << "  ";
+                // }
+                // std::cout << std::endl;
 
-            // std::cout << std::hex << "0x" << CAN_connector_->Cdf_i[i].uID << "  : ";
-            // for (size_t j = 0; j < 8; j++) {
-            //   std::cout << std::hex << "0x" << (int)CAN_connector_->Cdf_i[i].arryData[j]
-            //             << "  ";
-            // }
-            // std::cout << std::endl;
+                a_dis_rot_ = (double)a_dis_inc_ / (double)a_motor_->getEncoderResolution();
+                // ROS_WARN("left dis : %.6f", left_dis);
+                /*for(i=0;i<4;i++)
+                {
+                        std::cout<<std::to_string(vel_rec_buffer_.hexVal[i])<<std::endl;
+                }*/
+                a_vel_rpm_ = ((a_vel_inc_ * 1875.0) / (a_motor_->getEncoderResolution() * 512.0 ));
+                a_vel_list.push_back(a_vel_rpm_);
 
-            b_dis_rot_ = (double)b_dis_inc_ / (double)b_motor_->getEncoderResolution();
-            /*for(i=0;i<4;i++)
+                // std::cout<<CAN_connector_->Cdf_i[i].uID<<std::endl;
+                // std::cout<<i<<std::endl;
+                flag_tmp[0] = true;
+                count++;
+            } else if (CAN_connector_->Cdf_i[i].uID == 0x281)  // 0x281
             {
-                    std::cout<<std::to_string(vel_rec_buffer_.hexVal[i])<<std::endl;
-            }*/
-            b_vel_rpm_ = (b_vel_inc_ * 1875.0) / (b_motor_->getEncoderResolution() * 512.0 );
-            b_vel_list.push_back(b_vel_rpm_);
-            // std::cout<<CAN_connector_->Cdf_i[i].uID<<std::endl;
-            //std::cout<<"right_real_speed:"<<std::to_string(right_realtime_Speed)<<std::endl;
-            // std::cout<<i<<std::endl;
+                if (flag_tmp[1]) {
+                    count++;
+                    continue;
+                }
+                vel_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[0];
+                vel_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[1];
+                vel_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[2];
+                vel_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[3];
+                dis_rec_buffer_.hexVal[0] = CAN_connector_->Cdf_i[i].arryData[4];
+                dis_rec_buffer_.hexVal[1] = CAN_connector_->Cdf_i[i].arryData[5];
+                dis_rec_buffer_.hexVal[2] = CAN_connector_->Cdf_i[i].arryData[6];
+                dis_rec_buffer_.hexVal[3] = CAN_connector_->Cdf_i[i].arryData[7];
+                b_vel_inc_ = vel_rec_buffer_.integer32;
+                b_dis_inc_ = dis_rec_buffer_.integer32;
+                b_dis_list.push_back(b_dis_inc_);
 
-            flag_tmp[1] = true;
-            count++;
+                // std::cout << std::hex << "0x" << CAN_connector_->Cdf_i[i].uID << "  : ";
+                // for (size_t j = 0; j < 8; j++) {
+                //   std::cout << std::hex << "0x" << (int)CAN_connector_->Cdf_i[i].arryData[j]
+                //             << "  ";
+                // }
+                // std::cout << std::endl;
+
+                b_dis_rot_ = (double)b_dis_inc_ / (double)b_motor_->getEncoderResolution();
+                /*for(i=0;i<4;i++)
+                {
+                        std::cout<<std::to_string(vel_rec_buffer_.hexVal[i])<<std::endl;
+                }*/
+                b_vel_rpm_ = (b_vel_inc_ * 1875.0) / (b_motor_->getEncoderResolution() * 512.0 );
+                b_vel_list.push_back(b_vel_rpm_);
+                // std::cout<<CAN_connector_->Cdf_i[i].uID<<std::endl;
+                //std::cout<<"right_real_speed:"<<std::to_string(right_realtime_Speed)<<std::endl;
+                // std::cout<<i<<std::endl;
+
+                flag_tmp[1] = true;
+                count++;
+            }
+        }
+        //std::cout << "===unlock===\t" << a_dis_inc_ << "\t==\t" << b_dis_inc_ << std::endl;
+
+        CAN_connector_->cdf_i_mutex_.unlock_shared();
+
+        // ROS_INFO("data quantity for computation : %d", count);
+        if (flag_tmp[0] && flag_tmp[1]) {
+            return true;
+        } else {
+            std::cerr << "one of the motor does not feedback datas!" << std::endl;
+            return false;
         }
     }
-
-    locker.unlock();
-    a_dis_inc_ = a_dis_list[0];
-    b_dis_inc_ = b_dis_list[0];
-    std::cout << "===unlock===\t" << a_dis_inc_ << "\t==\t" << b_dis_inc_ << std::endl;
-
-    // ROS_INFO("data quantity for computation : %d", count);
-    if (flag_tmp[0] && flag_tmp[1]) {
-        return true;
-    } else {
-        std::cerr << "one of the motor does not feedback datas!" << std::endl;
+    else {
+        //std::cerr << "passing one round" << std::endl;
         return false;
     }
+
 }
 
 bool DoubleMotor::setPosModeAcc(const MotorID &id, const long long &posAcc, const long long &negAcc){

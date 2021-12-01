@@ -42,6 +42,7 @@ public:
     bool fastWrite_FastAbs_inc(const MotorID& id, const int& inc, const int& inc_b = 0);
 
     // receive state info from motors (A,B)
+    // thread safe
     virtual bool Motor_Feedback();
 
     // go to the origin point

@@ -12,14 +12,12 @@ void moveTo(DoubleMotor& obj,const int& targeta, const int& targetb, const int& 
 
     auto errora = std::abs(obj.a_dis_inc_-targeta);
     auto errorb = std::abs(obj.b_dis_inc_-targetb);
-    std::cout << "=======================" << std::endl;
     while (errora > threshold || errorb > threshold) {
         obj.Motor_Feedback();
         errora = std::abs(obj.a_dis_inc_-targeta);
         errorb = std::abs(obj.b_dis_inc_-targetb);
-        std::cout << errora << '\t' << errorb << std::endl;
+        //std::cout << errora << '\t' << errorb << std::endl;
     }
-    std::cout << "=======================" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -33,9 +31,9 @@ int main(int argc, char** argv) {
     miniload.Motor_Feedback();
     miniload.enable_FastAbs_displacementMode(':');
 
-    int threshold = 1000;
+    int threshold = 100;
     auto targeta = shelf_absPos_a[5];
-    auto targetb = shelf_absPos_b[4];
+    auto targetb = shelf_absPos_b[6];
     moveTo(miniload,targeta, targetb, threshold);
 
     targeta = shelf_absPos_a[2];
