@@ -1,19 +1,22 @@
 #include <iostream>
+#include <cassert>
+#include <functional>
 #include "../include/miniloadCore/communication/ICANCmd.h"
 #include "../include/miniloadCore/communication/can_drive.h"
+#include "../../common/include/miniloadCore/common/data_type.h"
 
 #define dwType   USBCAN_C_1CH //ACUSB_131B   设备类型
 #define dwIndex   0  //设备端口号 从1开始
 #define dwChannel   0  //通道号
 
-can_communication::can_communication()
+can_communication::can_communication() :  rec_window_(4),
+rec_thread_(&can_communication::Can_Channel_Receive, this, rec_window_)
 {
-
+    rec_thread_.detach();
 }
 
 can_communication::~can_communication()
 {
-
 }
 
 unsigned int can_communication::Can_Open()
@@ -51,6 +54,7 @@ bool can_communication::Can_Close()
         std::cout << "error!!!!!!" << std::endl;
     }
 }
+
 
 bool can_communication::Can_Channel_Start()
 {
@@ -132,23 +136,51 @@ unsigned long can_communication:: Can_Channel_Send(UINT Send_ID,BYTE Data_length
     }
 }
 
-unsigned long can_communication::Can_Channel_Receive()
+void can_communication::Can_Channel_Receive(const unsigned long& size)
 {
-    Cdf_i[0].bRemoteFlag = 0;
-    Cdf_i[0].bExternFlag = 0;
-    //Cdf_i[0].nDataLen = 2500;     //test 
-    //Cdf_i[0].uID = Receive_ID;
-    int channel_receive_flag = CAN_ChannelReceive(dwDeviceHandle, dwChannel, Cdf_i, 500);
-    if(channel_receive_flag == 0)
-    {
-        std::cout << "the device is not exisit or usb lost,you can restart can device" << std::endl;
-        return 0;
-    }
-    else 
-    {
-        return 1;
+    assert(size < 2500);
+    static int countrec = 0;
+    while (true) {
+        //std::unique_lock locker(cdf_i_mutex_);
+        Cdf_i[0].bRemoteFlag = 0;
+        Cdf_i[0].bExternFlag = 0;
+
+//        // if the receive buffer doesn't have enough datas
+        while(Can_Rec_Count() < size) ;
+
+        effective_rec_count_ = CAN_ChannelReceive(dwDeviceHandle, dwChannel, Cdf_i, size);
+        //locker.unlock();
+        std::cout << "===received counts in can driver:\t" << effective_rec_count_ << std::endl;
+        if(effective_rec_count_ == 0)
+        {
+            std::cout << "the device is not exisit or usb lost,you can restart can device" << std::endl;
+        } else{
+//            hex2int32 temp;
+//            for (int i = 0; i <effective_rec_count_; ++i) {
+//                for (int j = 0; j < 4; ++j) {
+//                    temp.hexVal[j] = Cdf_i[i].arryData[j+4];
+//                }
+//                std::cout << "received:\t" << temp.integer32 << std::endl;
+//            }
+        }
+
     }
 }
+
+unsigned long can_communication::Can_Rec_Count() const {
+    return CAN_GetReceiveCount(dwDeviceHandle,dwChannel);
+}
+
+bool can_communication::Can_Clear_Rec_Buffer() const {
+    int channel_clear_flag = CAN_ClearReceiveBuffer(dwDeviceHandle, dwChannel);
+    if (channel_clear_flag == 0) {
+        std::cout << "receive buffer clearing failed!" << std::endl;
+        return false;
+    } else{
+        return true;
+    }
+}
+
 
 bool can_communication::Can_Get_Error_Info()
 {

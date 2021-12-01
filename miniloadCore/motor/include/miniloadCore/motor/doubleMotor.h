@@ -68,6 +68,7 @@ private:
     bool motorPowerOff(const MotorID& id) const;
     bool setPosPara2Zero(const MotorID& id)const;
     bool enable_REL_displacementMode(const MotorID& id);
+    void delayus(const int& us);
     struct MotorASpeedMode {
         INT16 Motor_ID1 = 0x202;  // mode
         INT16 Motor_ID2 = 0x302;  // speed

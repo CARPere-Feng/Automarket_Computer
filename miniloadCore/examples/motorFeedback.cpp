@@ -3,9 +3,24 @@
 //
 
 #include "rclcpp/rclcpp.hpp"
-
+#include <memory>
 #include "../motor/include/miniloadCore/motor/doubleMotor.h"
 #include "../common/include/miniloadCore/common/shelf_pos_config.h"
+
+void moveTo(DoubleMotor& obj,const int& targeta, const int& targetb, const int& threshold) {
+    obj.fastWrite_FastAbs_inc(':',targeta,targetb);
+
+    auto errora = std::abs(obj.a_dis_inc_-targeta);
+    auto errorb = std::abs(obj.b_dis_inc_-targetb);
+    std::cout << "=======================" << std::endl;
+    while (errora > threshold || errorb > threshold) {
+        obj.Motor_Feedback();
+        errora = std::abs(obj.a_dis_inc_-targeta);
+        errorb = std::abs(obj.b_dis_inc_-targetb);
+        std::cout << errora << '\t' << errorb << std::endl;
+    }
+    std::cout << "=======================" << std::endl;
+}
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);  //初始化节点
@@ -13,12 +28,24 @@ int main(int argc, char** argv) {
 
     DoubleMotor miniload;
     miniload.disableMotors(':');
-    miniload.fastWrite_FastAbs_inc(':',0,0);
-    miniload.goOrigin();
     miniload.setPosModeAcc('b',10,10);
     miniload.setPosModeAcc('a',10,10);
+    miniload.Motor_Feedback();
     miniload.enable_FastAbs_displacementMode(':');
-    miniload.fastWrite_FastAbs_inc(':',shelf_absPos_a[3],shelf_absPos_b[4]);
+
+    int threshold = 1000;
+    auto targeta = shelf_absPos_a[5];
+    auto targetb = shelf_absPos_b[4];
+    moveTo(miniload,targeta, targetb, threshold);
+
+    targeta = shelf_absPos_a[2];
+    targetb = shelf_absPos_b[4];
+    moveTo(miniload,targeta, targetb, threshold);
+
+    targeta = shelf_absPos_a[5];
+    targetb = shelf_absPos_b[2];
+    moveTo(miniload,targeta, targetb, threshold);
+
     miniload.disableMotors(':');
 
     while (rclcpp::ok()) {
@@ -31,3 +58,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+
