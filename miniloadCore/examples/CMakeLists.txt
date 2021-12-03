@@ -4,7 +4,7 @@ set(MINILOAD_LIB_NAME miniload_core_examples)
 
 
 add_executable(${MINILOAD_LIB_NAME}
-        main.cpp)
+        vel_control.cpp)
 ament_target_dependencies(${MINILOAD_LIB_NAME}
         rclcpp
         )
