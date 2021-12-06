@@ -24,6 +24,19 @@ DoubleMotor::~DoubleMotor() {
     CAN_connector_.reset();
 }
 
+void DoubleMotor::moveToPosition(const int& targeta, const int& targetb, const int& threshold) {
+    fastWrite_FastAbs_inc(':',targeta,targetb);
+
+    auto errora = std::abs(a_dis_inc_-targeta);
+    auto errorb = std::abs(b_dis_inc_-targetb);
+    while (errora > threshold || errorb > threshold) {
+        Motor_Feedback();
+        errora = std::abs(a_dis_inc_-targeta);
+        errorb = std::abs(b_dis_inc_-targetb);
+        //std::cout << errora << '\t' << errorb << std::endl;
+    }
+}
+
 bool DoubleMotor::motorPowerOff(const MotorID &id) const {
     BYTE CW_stop[2] = {0x06, 0x00};
     switch (id) {
@@ -444,9 +457,9 @@ bool DoubleMotor::setPosModeAcc(const MotorID &id, const long long &posAcc, cons
     return true;
 }
 
-bool DoubleMotor::goOrigin() {
+bool DoubleMotor::goOrigin(const int& threshold) {
     if (enable_FastAbs_displacementMode(':')) {
-        fastWrite_FastAbs_inc(':',0,0);
+        moveToPosition(0,0,threshold);
         return true;
     } else
         return false;

@@ -32,17 +32,18 @@ int main(int argc, char** argv) {
     miniload.enable_FastAbs_displacementMode(':');
 
     int threshold = 100;
-    auto targeta = shelf_absPos_a[5];
-    auto targetb = shelf_absPos_b[6];
-    moveTo(miniload,targeta, targetb, threshold);
+    auto targeta = shelf_absPos_a[4];
+    auto targetb = shelf_absPos_b[3];
+    miniload.moveToPosition(targeta, targetb, threshold);
 
-    targeta = shelf_absPos_a[2];
-    targetb = shelf_absPos_b[4];
-    moveTo(miniload,targeta, targetb, threshold);
+     targeta = shelf_absPos_a[3];
+     targetb = shelf_absPos_b[4];
+    miniload.moveToPosition(targeta, targetb, threshold);
 
-    targeta = shelf_absPos_a[5];
-    targetb = shelf_absPos_b[2];
-    moveTo(miniload,targeta, targetb, threshold);
+     targeta = shelf_absPos_a[2];
+     targetb = shelf_absPos_b[5];
+    miniload.moveToPosition(targeta, targetb, threshold);
+    miniload.goOrigin(threshold);
 
     miniload.disableMotors(':');
 

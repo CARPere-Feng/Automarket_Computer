@@ -46,10 +46,11 @@ public:
     virtual bool Motor_Feedback();
 
     // go to the origin point
-    virtual bool goOrigin();
+    virtual bool goOrigin(const int& threshold);
 
     // a and b motor should be set splitely,Unit: rps/s
     bool setPosModeAcc(const MotorID& id, const long long& posAcc, const long long& negAcc);
+    void moveToPosition(const int& targeta, const int& targetb, const int& threshold);
 
     double a_vel_rpm_;
     int a_vel_inc_;

@@ -19,7 +19,7 @@ public:
         bool Can_Clear_Rec_Buffer() const;
         unsigned long Can_Rec_Count()const;
         CAN_DataFrame Cdf_i[2500];
-        std::shared_mutex cdf_i_mutex_;
+        std::shared_timed_mutex cdf_i_mutex_;
         unsigned long rec_window_;
         int effective_rec_count_;
         std::thread rec_thread_;

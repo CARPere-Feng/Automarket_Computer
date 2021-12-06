@@ -19,7 +19,8 @@ int main(int argc, char** argv) {
     miniload.fastWriteRPM('a',0);
 //  miniload.fastWriteRPM('b',-50);
 //    miniload.fastWriteRPM('b',0);
-
+    miniload.Motor_Feedback();
+    RCLCPP_INFO(rclcpp::get_logger("vel_control_node"), " current a is %d, b is %d",miniload.a_dis_inc_,miniload.b_dis_inc_);
     miniload.disableVelocityMode(':');
 
   while (rclcpp::ok()) {
