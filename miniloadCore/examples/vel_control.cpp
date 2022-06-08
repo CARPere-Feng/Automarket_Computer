@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
 
   // writePositionDEMO();
   miniload.enableVelocityMode(':');
-  miniload.fastWriteRPM('a',10);    // a is up-down; b is forward-backward
-    miniload.fastWriteRPM('a',0);
+  miniload.fastWriteRPM('a',-100);    // a is up-down; b is forward-backward
+    miniload.fastWriteRPM('a',10);
 //  miniload.fastWriteRPM('b',-50);
 //    miniload.fastWriteRPM('b',0);
     miniload.Motor_Feedback();

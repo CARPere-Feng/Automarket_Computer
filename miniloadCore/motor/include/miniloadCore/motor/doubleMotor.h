@@ -52,6 +52,9 @@ public:
     bool setPosModeAcc(const MotorID& id, const long long& posAcc, const long long& negAcc);
     void moveToPosition(const int& targeta, const int& targetb, const int& threshold);
 
+    // set combined max velocity of motor A and B [Unit: rpm]
+    void setCombinedVel_RPM(const int& maxVel);
+
     double a_vel_rpm_;
     int a_vel_inc_;
     double a_dis_rot_;
@@ -63,12 +66,12 @@ public:
     std::shared_ptr<can_communication> CAN_connector_;  // Thread safe
     std::unique_ptr<Motor_Control> a_motor_;
     std::unique_ptr<Motor_Control> b_motor_;
+    bool setPosPara2Zero(const MotorID& id)const;
 private:
     // if only one motor rpm should be write, then set rpm
     // if two motors should be write, set rpm as speed of a, rpm_b as b
     bool writeRPM(const MotorID& id, const int& rpm, const int& rpm_b = 0);
     bool motorPowerOff(const MotorID& id) const;
-    bool setPosPara2Zero(const MotorID& id)const;
     bool enable_REL_displacementMode(const MotorID& id);
     void delayus(const int& us);
     struct MotorASpeedMode {
@@ -126,7 +129,7 @@ private:
     hex2int32 vel_rec_buffer_;  // velocity receive buffer
     hex2int32 dis_rec_buffer_;  // displacement receive buffer
 
-    const int maxTrapezoidVel_ = 100;   //UNIT: rpm
+    int maxTrapezoidVel_ = 300;   //UNIT: rpm
 };  // DoubleMotor
 
 #endif //MINILOADCORE_MOTOR_DOUBLEMOTOR_H

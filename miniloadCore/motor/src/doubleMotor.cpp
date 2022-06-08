@@ -494,3 +494,7 @@ void DoubleMotor::delayus(const int &us) {
         }
     }
 }
+
+void DoubleMotor::setCombinedVel_RPM(const int& maxVel) {
+    maxTrapezoidVel_ = maxVel;
+}

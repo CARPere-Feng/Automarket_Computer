@@ -23,7 +23,7 @@ public:
     void Can_Close();
     void Can_Start();
     void Dec2HexVector(BYTE *data_vec, const int &dec_value, const int &len);
-    void Set_Speed_Boundary(const int& upper, const int& lower);
+    void Set_Single_Motor_Speed_Boundary(const int& upper, const int& lower);
     int getEncoderResolution(){ return encoder_num;}
 
 private:
@@ -31,8 +31,8 @@ private:
 
 	BYTE PDO_Open[2];
 	int encoder_num = 65536;
-    int up_vel_ = 50; // unit: rpm
-    int low_vel_ = -50; // unit: rpm
+    int up_vel_ = 500; // unit: rpm
+    int low_vel_ = -500; // unit: rpm
     const std::shared_ptr<can_communication>& CAN_obj_;
 };
 

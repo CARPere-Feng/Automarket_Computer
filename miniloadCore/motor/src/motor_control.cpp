@@ -118,7 +118,7 @@ void Motor_Control::Dec2HexVector(BYTE *data_vec, const int &dec_value,
   }
 }
 
-// velecity should be within 50 rpm
+// velecity should be within velocity boundary
 bool Motor_Control::is_Speed_Safe(int &vel) {
     if (vel > up_vel_) {
         vel = up_vel_;
@@ -129,7 +129,7 @@ bool Motor_Control::is_Speed_Safe(int &vel) {
     return true;
 }
 
-void Motor_Control::Set_Speed_Boundary(const int &upper, const int &lower) {
+void Motor_Control::Set_Single_Motor_Speed_Boundary(const int &upper, const int &lower) {
     up_vel_ = upper;
     low_vel_ = lower;
 }
